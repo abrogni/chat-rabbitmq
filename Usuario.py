@@ -1,18 +1,18 @@
-# cliente.py
-
 import pika
 import threading
 import json
 
-class ChatClient:
-    def __init__(self, username, message_callback):
-        self.username = username
-        self.groups = set()
-        self.message_callback = message_callback
+class Usuario:
+    def __init__(self, nome, callback_msg):
+        self.nome = nome
+        self.grupos = set()
+        self.callback_msg = callback_msg
 
+        # conexao rabitmq
         self.connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
         self.channel = self.connection.channel()
 
+        # cria exchange tipo topic
         self.exchange = 'chat_exchange'
         self.channel.exchange_declare(exchange=self.exchange, exchange_type='topic')
 
@@ -21,27 +21,27 @@ class ChatClient:
 
         threading.Thread(target=self.start_consuming, daemon=True).start()
 
-    def join_group(self, group):
-        routing_key = f"chat.group.{group}"
+    def entrar_grupo(self, grupo):
+        routing_key = f"chat.grupo.{grupo}"
         self.channel.queue_bind(exchange=self.exchange, queue=self.queue_name, routing_key=routing_key)
-        self.groups.add(group)
+        self.grupos.add(grupo)
 
-    def send_message(self, group, message):
+    def enviar_msg(self, grupo, mensagem):
         body = json.dumps({
-            'sender': self.username,
-            'group': group,
-            'message': message
+            'usuario': self.nome,
+            'grupo': grupo,
+            'mensagem': mensagem
         })
         self.channel.basic_publish(
             exchange=self.exchange,
-            routing_key=f"chat.group.{group}",
+            routing_key=f"chat.grupo.{grupo}",
             body=body
         )
 
     def start_consuming(self):
         def callback(ch, method, properties, body):
             data = json.loads(body)
-            self.message_callback(data)
+            self.callback_msg(data)
 
         self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback, auto_ack=True)
         self.channel.start_consuming()
