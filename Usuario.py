@@ -16,7 +16,9 @@ class Usuario:
         self.exchange = 'chat_exchange'
         self.channel.exchange_declare(exchange=self.exchange, exchange_type='topic')
 
-        result = self.channel.queue_declare(queue='', exclusive=True)
+        # cria uma fila exclusiva do usuario
+        nome_fila = f"fila_{self.nome}"
+        result = self.channel.queue_declare(queue=nome_fila,durable=True)
         self.queue_name = result.method.queue
 
         threading.Thread(target=self.start_consuming, daemon=True).start()
@@ -41,13 +43,15 @@ class Usuario:
         self.channel.basic_publish(
             exchange=self.exchange,
             routing_key=f"chat.grupo.{grupo}",
-            body=body
+            body=body,
+            properties=pika.BasicProperties(delivery_mode=2) #entrega persistente
         )
 
     def start_consuming(self):
         def callback(ch, method, properties, body):
             data = json.loads(body)
             self.callback_msg(data)
+            ch.basic_ack(delivery_tag=method.delivery_tag) #confirmação de recebimento
 
-        self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback, auto_ack=True)
+        self.channel.basic_consume(queue=self.queue_name, on_message_callback=callback, auto_ack=False)
         self.channel.start_consuming()

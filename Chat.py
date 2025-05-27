@@ -14,7 +14,7 @@ class Chat:
             tela_chat.quit()
         
         self.usuario = Usuario(self.nome, self.exibir_mensagem)
-        
+
         self.area_txt = scrolledtext.ScrolledText(tela_chat, wrap=tk.WORD, height=20)
         self.area_txt.pack(padx=10, pady=5)
         self.area_txt.config(state=tk.DISABLED)
@@ -99,3 +99,7 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = Chat(root)
     root.mainloop()
+
+
+# demonstrar assincronismo
+# persistencia e durabilidade
