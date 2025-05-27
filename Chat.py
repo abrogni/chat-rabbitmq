@@ -12,10 +12,9 @@ class Chat:
         if not self.nome:
             messagebox.showerror("Erro", "Nome de usuário obrigatório.")
             tela_chat.quit()
-
+        
         self.usuario = Usuario(self.nome, self.exibir_mensagem)
-
-        # area de texto da tela
+        
         self.area_txt = scrolledtext.ScrolledText(tela_chat, wrap=tk.WORD, height=20)
         self.area_txt.pack(padx=10, pady=5)
         self.area_txt.config(state=tk.DISABLED)
@@ -28,6 +27,9 @@ class Chat:
 
         self.bt_grupo = tk.Button(self.frame_grupo, text="Entrar no grupo", command=self.add_grupo)
         self.bt_grupo.pack(side=tk.LEFT, padx=5)
+
+        self.bt_sair_grupo = tk.Button(self.frame_grupo, text="Sair do grupo", command=self.sair_grupo)
+        self.bt_sair_grupo.pack(side=tk.LEFT, padx=5)
 
         self.edit_msg = tk.Entry(tela_chat, width=60)
         self.edit_msg.pack(padx=10, pady=5)
@@ -78,6 +80,20 @@ class Chat:
         self.area_txt.insert(tk.END, texto + "\n")
         self.area_txt.config(state=tk.DISABLED)
         self.area_txt.see(tk.END)
+    
+    def sair_grupo(self):
+        grupo = self.selecao_grupo.get()
+        if grupo:
+            self.usuario.sair_grupo(grupo)
+
+            menu = self.combo_grupo["menu"]
+            self.selecao_grupo.set("")
+            menu.delete(grupo)
+
+            self.area_txt.config(state=tk.NORMAL)
+            self.area_txt.insert(tk.END, f"Você saiu do grupo '{grupo}'\n")
+            self.area_txt.config(state=tk.DISABLED)
+            self.area_txt.see(tk.END)
 
 if __name__ == "__main__":
     root = tk.Tk()

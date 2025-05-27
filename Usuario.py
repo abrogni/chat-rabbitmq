@@ -26,6 +26,12 @@ class Usuario:
         self.channel.queue_bind(exchange=self.exchange, queue=self.queue_name, routing_key=routing_key)
         self.grupos.add(grupo)
 
+    def sair_grupo(self,grupo):
+        routing_key = f"chat.grupo.{grupo}"
+        self.channel.queue_unbind(exchange=self.exchange, queue=self.queue_name, routing_key=routing_key)
+        if grupo in self.grupos:
+            self.grupos.remove(grupo)
+
     def enviar_msg(self, grupo, mensagem):
         body = json.dumps({
             'usuario': self.nome,
