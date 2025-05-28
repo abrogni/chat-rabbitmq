@@ -12,7 +12,7 @@ class Chat:
         if not self.nome:
             messagebox.showerror("Erro", "Nome de usuário obrigatório.")
             tela_chat.quit()
-        
+        self.tela_chat.title(f"Chat {self.nome}")
         self.usuario = Usuario(self.nome, self.exibir_mensagem)
 
         self.area_txt = scrolledtext.ScrolledText(tela_chat, wrap=tk.WORD, height=20)
